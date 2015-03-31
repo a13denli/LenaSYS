@@ -93,6 +93,7 @@ function returned(data)
 			var boxid=retdata['box'][i][0];
 			var boxtype=retdata['box'][i][1].toUpperCase();
 			var boxcontent=retdata['box'][i][2];
+			var boxwordlist=retdata['box'][i][3];
 		
 			// don't create templatebox if it already exists
 			if(!document.getElementById(contentid)){
@@ -116,7 +117,7 @@ function returned(data)
 					}
 					$("#"+contentid).css("margin-top", boxmenuheight-1);
 
-					rendercode(boxcontent,boxid);
+					rendercode(boxcontent,boxid,boxwordlist);
 			}else if(boxtype == "DOCUMENT"){
 				
 					// Print out description in a document box
@@ -141,7 +142,6 @@ function returned(data)
 						var boxmenuheight= $("#"+contentid+"menu").height();
 					}
 					$("#"+contentid).css("margin-top", boxmenuheight);
-					
 					
 					createboxmenu(contentid,boxid,boxtype);
 					
@@ -279,10 +279,8 @@ function createboxmenu(contentid, boxid, type){
 			//----------------------------------------------------------------------------------------- DOCUMENT
 			if(type=="DOCUMENT"){
 				var str = '<table cellspacing="2"><tr>';
-				str+= '<td class="butto2" title="Change box title"><span class="boxtitleEditable">'+retdata['box'][boxid-1][3]+'</span></td>';
-				str+= '<td class="butto2 showdesktop" title="Remove formatting" onclick="styleReset();"><img src="../Shared/icons/reset_button.svg" /></td>';
-				str+= '<td class="butto2 showdesktop" title="Heading" onclick="styleHeader();"><img src="../Shared/icons/boldtext_button.svg" /></td>';
-				str+= "<td class='butto2 showdesktop imgdropbutton' onclick='displayDrop(\"imgdrop\");'  title='Select image'><img src='../Shared/icons/picture_button.svg' /></td>";
+				str+= '<td class="butto2" title="Change box title"><span class="boxtitleEditable">'+retdata['box'][boxid-1][4]+'</span></td>';
+				str+="<td class='butto2 showdesktop codedropbutton' onclick='displayEditContent("+boxid+");' ><img src='../Shared/icons/general_settings_button.svg' /></td>";
 							
 				str+="</tr></table>";
 				//----------------------------------------------------------------------------------------- END DOCUMENT
@@ -990,7 +988,7 @@ while (c) {		// c == first character in each word
 // Requires tokens created by a cockford-type tokenizer
 //----------------------------------------------------------------------------------
 
-function rendercode(codestring,boxid)
+function rendercode(codestring,boxid,wordlistid)
 {
     var destinationdiv = "box" + boxid;
 	tokens = [];
@@ -999,13 +997,11 @@ function rendercode(codestring,boxid)
 	for(var i=0;i<retdata.impwords.length;i++){
 		important[retdata.impwords[i]]=retdata.impwords[i];	
 	}
-	
 
-	keywords=[];
+	keywords= [];
 	for(var i=0;i<retdata['words'].length;i++){
-		if(retdata['words'][i][0]==wordlist){
-			temp=[retdata['words'][i][1],retdata['words'][i][2]];
-			keywords[temp]=temp;
+		if(retdata['words'][i][0]==wordlistid){
+			keywords[retdata['words'][i][1]]=retdata['words'][i][2];
 		}
 	}
 
@@ -1058,6 +1054,7 @@ function rendercode(codestring,boxid)
 			var foundkey=0;
 					
 			// Removed two for loops here and replaced it with smart indexing. either kind 2 or kind 1
+			console.log(keywords);
 			if(important[tokenvalue]!=null){
 					foundkey=2;
 			}else if(keywords[tokenvalue]!=null){	
@@ -1065,7 +1062,7 @@ function rendercode(codestring,boxid)
 			}
 			
 			if(foundkey==1){
-				cont+="<span class='keyword"+label+"'>"+tokenvalue+"</span>";														
+				cont+="<span class='keyword"+keywords[tokenvalue]+"'>"+tokenvalue+"</span>";														
 			}else if(foundkey==2){
 				iwcounter++;
 				cont+="<span id='IW"+iwcounter+"' class='impword' onmouseover='highlightKeyword(\""+tokenvalue+"\")' onmouseout='dehighlightKeyword(\""+tokenvalue+"\")'>"+tokenvalue+"</span>";														
